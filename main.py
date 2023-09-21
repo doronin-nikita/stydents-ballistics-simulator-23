@@ -3,7 +3,7 @@
 '''
 
 import pyvista as pv
-from physic import get_cords
+from physic import get_cords, data
 from modeles import *
 
 objs = []
@@ -18,7 +18,9 @@ eng = MyCustomRoutine(red_sphere)
 
 plotter = pv.Plotter()
 
-plotter.add_mesh(cannon)
+plotter.add_mesh(cannon.rotate_y(data["angle"][0]))
+plotter.add_mesh(cannon_platform)
+
 for i in range(0,16):
     plotter.add_mesh(objs[i], color='gray')
 plotter.add_mesh(red_sphere, color='red')

@@ -4,7 +4,8 @@
 
 from pyvista import read
 
-cannon = read('untitled.obj')
+cannon = read('gun.obj')
+cannon_platform = read('base.obj')
 
 from pyvista import Sphere
 class MyCustomRoutine:
