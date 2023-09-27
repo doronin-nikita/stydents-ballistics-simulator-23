@@ -1,18 +1,36 @@
-import pyvista as pv
-from math import sin
+'''
+Отображение выстрела в графическом окне
+'''
 
-def get_cords(i):
-    return (i,0,5*sin(i/5))
+import pyvista as pv
+from physic import get_cords, data
+from modeles import *
 
 objs = []
 for i in range(0,16):
     objs.append(pv.Sphere(center=get_cords(i),radius=0.1))
 
-block1 = pv.Cube(center=(0,0,0), x_length=1, y_length=0.2, z_length=0.2).rotate_y(-45, inplace=False)
+red_sphere = pv.Sphere(center=get_cords(0),radius=0.11)
+
+eng = MyCustomRoutine(red_sphere)
+
+
 
 plotter = pv.Plotter()
-plotter.add_mesh(block1, color='blue')
+
+plotter.add_mesh(cannon.rotate_y(data["angle"][0]))
+plotter.add_mesh(cannon_platform)
+
 for i in range(0,16):
-    plotter.add_mesh(objs[i], color='red')
+    plotter.add_mesh(objs[i], color='gray')
+plotter.add_mesh(red_sphere, color='red')
+plotter.add_slider_widget(
+    callback=lambda value: eng('center',get_cords(value)) ,
+    rng=[0,16],
+    value=0,
+    pointa=(0.1,0.1),
+    pointb=(0.9,0.1),
+    style="modern",
+)
 plotter.show_grid()
 plotter.show()
