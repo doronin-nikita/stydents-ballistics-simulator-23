@@ -1,2 +1,2 @@
-m,angle,impulse
-1,30,1
+m,angle,rotation,impulse
+0.01,30,0,0.1
