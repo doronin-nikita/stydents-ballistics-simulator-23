@@ -2,13 +2,15 @@
 загрузка и обработка моделей
 '''
 
-from pyvista import read
+from pyvista import read        #, read_texture
 
 cannon = read('gun.obj')
+#tex=read_texture('gun.mtl')
 cannon_platform = read('base.obj')
 
-def update(mesh, angle):
-    mesh.output.overwrite(mesh.rotate_y(angle))
+def update(mesh, angle, p):
+    mesh.overwrite(mesh.rotate_y(angle))
+    #p.update()
 
 from pyvista import Sphere
 class MyCustomRoutine:
