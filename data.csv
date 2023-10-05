@@ -1,2 +1,2 @@
-m,angle,rotation,impulse
+mass,angle,rotation,impulse
 0.01,30,0,0.1

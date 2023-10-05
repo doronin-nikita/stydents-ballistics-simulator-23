@@ -23,28 +23,42 @@ class myScene:
         self.data = _data
         self.plot = pv.Plotter()
         self.plot.title = 'cannon simulator'
-        self.original_cannon=_cannon
+        self.original_cannon=_cannon                                # изначальные модели дула и платформы
         self.original_cannon_platform=_cannon_platform
         self.actor_cannon = self.plot.add_mesh(self.original_cannon)
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform)
 
+        self.bullets = []
+
         self.plot.show_grid()
         self.plot.add_camera_orientation_widget()
+
+        self.plot.suppress_rendering = True
     
     def redraw(self, _data=None):
         '''
         @brief метод обновления моделей сцены
-        @param _data - таблица параметров, которые будут обнавлены в сцене
+        @param _data - таблица параметров, которые будут обнавлены в сцене (параметры выбираются при инициализации)
         '''
         if _data is not None:
             for col in _data:
                 self.data[col]=_data[col]
+        
         self.plot.remove_actor(self.actor_cannon)
         self.plot.remove_actor(self.actor_cannon_platform)
-        self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(self.data['angle']).rotate_z(self.data['rotation']))
-        self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']))
 
+        for bullet in self.bullets:
+            self.plot.remove_actor(bullet)
 
+        self.bullets = []
+        for coords in get_coords(self.data):
+            self.bullets.append(self.plot.add_mesh(pv.Sphere(center=coords, radius=0.3), color="red"))
+
+        self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
+        self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
+
+        self.plot.render()
+        
     def show(self):
         '''
         @brief метод передающий вызов отрисовки сцены
@@ -52,7 +66,7 @@ class myScene:
         self.plot.show()
 
 
-scene = myScene(cannon,cannon_platform,{'rotation':0, 'angle':0})
+scene = myScene(cannon,cannon_platform,{'rotation':0, 'angle':0, 'impulse':5, 'mass':0.1})
 scene.redraw()
 
 scene.plot.add_slider_widget(
