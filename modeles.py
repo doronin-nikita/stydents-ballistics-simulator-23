@@ -30,3 +30,12 @@ class MyCustomRoutine:
         result = Sphere(**self.kwargs)
         self.output.overwrite(result)
         return
+    
+class MyCustomRoutine2:
+    def __init__(self, mesh):
+        self.output = mesh
+
+    def updates(self, angle):
+        result = cannon.rotate_y(angle)
+        self.output.overwrite(result)
+        return
