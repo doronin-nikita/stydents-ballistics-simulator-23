@@ -3,7 +3,7 @@
 '''
 
 import pyvista as pv
-from physic import get_coords, data
+from physic import get_coords, data, velocity_chart
 from modeles import *
 
 plotter = pv.Plotter()
@@ -21,7 +21,8 @@ class myScene:
         @param _data, копирует таблицу числовых параметров физических показателей обьектов сцены
         '''
         self.data = _data
-        self.plot = pv.Plotter()
+        self.plot = pv.Plotter(shape="1|1")
+
         self.plot.title = 'cannon simulator'
         self.original_cannon=_cannon                                # изначальные модели дула и платформы
         self.original_cannon_platform=_cannon_platform
@@ -29,6 +30,11 @@ class myScene:
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform)
 
         self.bullets = []
+
+        self.plot.subplot(1)
+        self.plot.set_background('gray', all_renderers=False)
+        self.plot.label="Velocity"
+        self.plot.subplot(0)
 
         self.plot.show_grid()
         self.plot.add_camera_orientation_widget()
@@ -57,6 +63,10 @@ class myScene:
         self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
 
+        self.plot.subplot(1) 
+        self.plot.add_chart(velocity_chart)  
+
+        self.plot.subplot(0)
         self.plot.render()
         
     def show(self):
@@ -86,5 +96,7 @@ scene.plot.add_slider_widget(
         pointb=(0.9,0.1),
         style="modern",
 )
+
+
 
 scene.show()
