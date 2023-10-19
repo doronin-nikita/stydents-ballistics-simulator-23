@@ -4,6 +4,7 @@ from pandas import read_csv, concat, DataFrame
 
 ### Загрузка констант ###
 values = read_csv("values.csv") 
+base_vector = read_csv("base vector.csv")
 
 window = Tk() 
 window.geometry(f"{5*180}x500")
@@ -32,6 +33,9 @@ def entry_click(col_index=None, clickedEntry=None, event=None):
 def insert_name(text):
     global ActiveEntry
     ActiveEntry.insert(INSERT, text) 
+
+def save_values():
+    values.to_csv('values.csv', index=False)
 
 def Redraw():
     global ActiveEntry
@@ -71,6 +75,9 @@ def Redraw():
     global new_value_add_btn
     new_value_add_btn= Button(text='add', width=15, command=lambda: add_value(name=new_value_name.get(), value=new_value_value.get()))
     new_value_add_btn.grid(row=current_row, column=5)
+    
+    current_row+=1
+    Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5)
 
     current_row+=1
     Label(text='x0, y0, z0').grid(row=current_row, column=0, columnspan=5)
@@ -80,6 +87,10 @@ def Redraw():
 
     current_row+=1
     Label(text='вектора ускорений').grid(row=current_row, column=0, columnspan=5)
+    for i in range(0,100):
+        current_row+=1
+        Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5)
+
     
 
 Redraw()
