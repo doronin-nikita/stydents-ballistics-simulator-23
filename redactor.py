@@ -1,96 +1,86 @@
 from tkinter import *
 from tkinter.ttk import Button
-from pandas import read_csv
+from pandas import read_csv, concat, DataFrame
 
 ### Загрузка констант ###
 values = read_csv("values.csv") 
 
 window = Tk() 
-window.geometry(f"{5*160}x500")
+window.geometry(f"{5*180}x500")
+
+def add_value(name, value):
+    global values
+    values.loc[len(values.index)] =  [name, value]
+    new_value_add_btn.destroy()
+    entry_click()
+    Redraw()
+    print(values)
+
+ActiveEntry = None
+ActiveColumn= None
+
+def entry_click(col_index=None, clickedEntry=None, event=None):
+    global ActiveEntry
+    global ActiveColumn
+    if (ActiveColumn is not None):
+        values['value'][ActiveColumn]=ActiveEntry.get()
+    
+    ActiveColumn = col_index
+    if (clickedEntry is not None):
+        ActiveEntry = clickedEntry
+
+def insert_name(text):
+    global ActiveEntry
+    ActiveEntry.insert(INSERT, text) 
 
 def Redraw():
+    global ActiveEntry
+
     current_row=0
     Label(text='Переменные и константы:').grid(row=current_row, column=0, columnspan=5)
     current_row=+1
-    j = 0
-    for col in values:
-        text = Entry(window, width=16, bg = "#9BC2E6") 
-        text.grid(row=current_row,column=j) #columnspan=j* 
-        text.insert(INSERT, col) 
-        text.config(state='readonly')
-        j+=1
+    
+    text = Entry(window, width=16, bg = "#9BC2E6") 
+    text.grid(row=current_row,column=0) #columnspan=j* 
+    text.insert(INSERT, 'name') 
+    text.config(state='readonly')
+
+    text = Entry(window, width=16*4, bg = "#9BC2E6") 
+    text.grid(row=current_row,column=1, columnspan=4) #columnspan=j* 
+    text.insert(INSERT, 'value') 
+    text.config(state='readonly')
+
     for i in range(0,len(values['name'])):
         current_row+=1
+        btn = Button(text=values['name'][i], width=16, command=lambda text="{"+values['name'][i]+"}": insert_name(text))
+        btn.grid(row=current_row, column=0)
 
+        text = Entry(window, width=16*4) 
+        text.grid(row=current_row,column=1,columnspan=4)
+        text.insert(INSERT, values['value'][i]) 
+        text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
+    
+    current_row+=1
+    new_value_name = Entry(window, width=16) 
+    new_value_name.grid(row=current_row,column=0) 
+    new_value_name.insert(INSERT, 'new') 
+    new_value_value = Entry(window, width=16*4) 
+    new_value_value.grid(row=current_row,column=1, columnspan=4) 
+    new_value_value.insert(INSERT, '') 
+    new_value_value.bind("<1>", lambda e, text= new_value_value: entry_click(None, text, e))
+    global new_value_add_btn
+    new_value_add_btn= Button(text='add', width=15, command=lambda: add_value(name=new_value_name.get(), value=new_value_value.get()))
+    new_value_add_btn.grid(row=current_row, column=5)
 
+    current_row+=1
+    Label(text='x0, y0, z0').grid(row=current_row, column=0, columnspan=5)
+    
+    current_row+=1
+    Label(text='вектора скорости').grid(row=current_row, column=0, columnspan=5)
 
+    current_row+=1
+    Label(text='вектора ускорений').grid(row=current_row, column=0, columnspan=5)
+    
 
 Redraw()
-#print(values['name'][0])
 window.mainloop()
-
-
-
-
-'''
-n_rows = df.shape[0] 
-n_cols = df.shape[1] 
-
-
-
-
-
-print(f"{(n_cols+1)*160}x500")
-column_names = df.columns 
-i=0
-Label(text="Константные параметры используемые в вычислениях:").grid(row=0, column=0, columnspan=n_cols, pady=10, padx=10)
-
-for j, col in enumerate(column_names): 
-    text = Entry(window, width=16, bg = "#9BC2E6") 
-    text.grid(row=i+1,column=j) 
-    text.insert(INSERT, col) 
-    text.config(state='readonly')
-    
-
-
-# adding all the other rows into the grid 
-for i in range(n_rows): 
-    for j in range(n_cols): 
-        text = Entry(window, width=16) 
-        text.grid(row=i+2,column=j) 
-        text.insert(INSERT, df.loc[i][j]) 
-
-
-Button(text="Записать").grid(row=2, column=n_cols, pady=10, padx=10)
-Label(text="Вектор начальной скорости:").grid(row=4, column=0, columnspan=n_cols, pady=10, padx=10)
-
-coords = ['№','x','y','z']
-startImpulseVectorBoxs = {}
-for j in range(0,len(coords)):
-    text = Entry(window, width=16, bg = "#9BC2E6") 
-    text.grid(row=5,column=j) 
-    text.insert(INSERT, coords[j]) 
-    text.config(state='readonly')
-
-    startImpulseVectorBoxs[coords[j]] = Entry(window, width=16) 
-    startImpulseVectorBoxs[coords[j]].grid(row=6,column=j)
-
-Button(text="Записать").grid(row=6, column=n_cols, pady=10, padx=10)
-Label(text="Вектора ускорений:").grid(row=7, column=0, columnspan=n_cols, pady=10, padx=10)
-
-aceleratorVectorBoxs = {}
-for j in range(0,len(coords)):
-    text = Entry(window, width=16, bg = "#9BC2E6") 
-    text.grid(row=8,column=j) 
-    text.insert(INSERT, coords[j]) 
-    text.config(state='readonly')
-
-    
-for i in range(0,9):
-    for j in range(0,len(coords)):
-        aceleratorVectorBoxs[coords[j]] = Entry(window, width=16) 
-        aceleratorVectorBoxs[coords[j]].grid(row=9+i,column=j)
-
-Button(text="Записать все").grid(row=8, column=n_cols, pady=10, padx=10)
-
-'''
