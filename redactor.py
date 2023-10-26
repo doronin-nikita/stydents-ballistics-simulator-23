@@ -92,10 +92,37 @@ def Redraw():
     
     current_row+=1
     Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-
-    current_row+=1
-    Label(text='x0, y0, z0').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
     
+    current_row+=1
+    Label(text='-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-').grid(row=current_row, column=0, columnspan=6, in_=second_frame)
+    
+    current_row+=1
+    Label(text='начальная точка {x0, y0, z0}').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+
+    current_column = 1
+    for v in {'x', 'y', 'z'}:
+        text = Entry(root, width=20, bg = "#9BC2E6")
+        text.grid(row=current_row,column=current_column, in_=second_frame) #columnspan=j*
+        text.insert(INSERT, v)
+        text.config(state='readonly')
+        current_column+=1
+
+    for i in range(0,len(base_vector['name'])):
+        current_row+=1
+        btn = Button(text=base_vector['name'][i], width=16, command=lambda text="{"+base_vector['name'][i]+"}": insert_name(text))
+        btn.grid(row=current_row, column=0, in_=second_frame)
+
+        current_column=1
+        for v in {'x', 'y', 'z'}:
+            text = Entry(root, width=20) 
+            text.grid(row=current_row,column=current_column, in_=second_frame)
+            text.insert(INSERT, base_vector[v][i]) 
+            text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
+            current_column+=1
+    current_row+=1
+    Button(text='save',  width=15*5, command=lambda table=base_vector, file="base vector.csv":table.to_csv(file, index=False)).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+
     current_row+=1
     Label(text='вектора скорости').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
 
