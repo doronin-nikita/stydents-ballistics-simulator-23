@@ -20,6 +20,35 @@ velocity_chart = Chart2D()
 velocity_t = []
 velocity_value = []
 
+def get_coords_new(_data):
+    values = read_csv("values.csv") 
+    base_vector = read_csv("base vector.csv")
+    velocity_vector = read_csv("velocity vector.csv")
+    acceleration_vectors = read_csv("acceleration vectors.csv")
+
+    ### переменные ###
+    vars = {"t": lambda **kwargs: 0}
+    
+    for i in range(0, len(values['name'])):
+        print(str(values['value'][i]).replace("{", "kwargs['").replace("}","']"))
+        vars[values['name'][i]]=lambda **kwargs: eval(str(values['value'][i]).replace("{", "kwargs['").replace("}","']"))
+    print(vars)
+    var_values = {}
+    var_values["t"]=0
+    
+    for name in values['name']:
+        print(name+": "+str(var_values))
+        var_values[name]=vars[name](**var_values)
+     
+    print(var_values)
+
+
+    #print(eval(base_vector['x'][0].replace("{", "vars['").replace("}","'](mass=0)")))
+    result = []
+
+    # начальное положение
+
+
 def get_coords(_data):
     '''
     @brief Функция для генерации точек через которые пролетает снаряд

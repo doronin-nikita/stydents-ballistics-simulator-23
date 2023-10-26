@@ -1,2 +1,2 @@
 name,x,y,z
-base,1,0,0
+base,{l}*cos({angle})*cos({rotation}), {l}*sin({rotation})*cos({angle}), {l}*sin({angle})
