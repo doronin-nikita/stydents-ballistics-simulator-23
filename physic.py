@@ -31,11 +31,10 @@ def get_coords_new(_data):
     
     for i in range(0, len(values['name'])):
         print(str(values['value'][i]).replace("{", "kwargs['").replace("}","']"))
-        vars[values['name'][i]]=lambda **kwargs: eval(str(values['value'][i]).replace("{", "kwargs['").replace("}","']"))
+        vars[values['name'][i]]=lambda my_str = str(values['value'][i]).replace("{", "kwargs['").replace("}","']"), **kwargs: eval(my_str)
     print(vars)
     var_values = {}
-    for name in values['name']:
-        var_values[name]=0
+    
     
     
     for name in values['name']:
@@ -43,7 +42,7 @@ def get_coords_new(_data):
         var_values[name]=vars[name](**var_values)
      
     print(var_values)
-    print(vars["angle"](mass=1))
+    #print(vars["angle"](mass=1))
 
     #print(eval(base_vector['x'][0].replace("{", "vars['").replace("}","'](mass=0)")))
     result = []
