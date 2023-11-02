@@ -3,5 +3,5 @@ l,12.6
 angle,30.0
 rotation,0.0
 mass,0.01
-impulse,0.1
+impulse,2.1
 g, -9.8* {mass}

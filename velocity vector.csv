@@ -1,2 +1,2 @@
 name,x,y,z
-base,1,0,0
+velocyty,{impulse}*cos({angle})*cos({rotation}), {impulse}*sin({rotation})*cos({angle}), {impulse}*sin({angle})

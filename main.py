@@ -3,7 +3,7 @@
 '''
 
 import pyvista as pv
-from physic import get_coords, data, velocity_chart
+from physic import get_coords_new as get_coords, data, velocity_chart
 from modeles import *
 
 plotter = pv.Plotter()
@@ -57,6 +57,7 @@ class myScene:
             self.plot.remove_actor(bullet)
 
         self.bullets = []
+
         for coords in get_coords(self.data):
             self.bullets.append(self.plot.add_mesh(pv.Sphere(center=coords, radius=0.3), color="red"))
 
@@ -76,7 +77,7 @@ class myScene:
         self.plot.show()
 
 
-scene = myScene(cannon,cannon_platform,{'rotation':0, 'angle':0, 'impulse':5, 'mass':0.1})
+scene = myScene(cannon,cannon_platform,{'rotation':0, 'angle':0})
 scene.redraw()
 
 scene.plot.add_slider_widget(

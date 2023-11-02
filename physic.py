@@ -21,52 +21,54 @@ velocity_t = []
 velocity_value = []
 
 def get_coords_new(_data):
-    values = read_csv("values.csv") 
+    variables = read_csv("values.csv") 
     base_vector = read_csv("base vector.csv")
     velocity_vector = read_csv("velocity vector.csv")
     acceleration_vectors = read_csv("acceleration vectors.csv")
-
+    ### изменение значений ### 
+    if _data is not None:
+        for i in range(0, len(variables['name'])):
+            if variables['name'][i] in _data:
+                variables['value'][i] = _data[variables['name'][i]]
+            if variables['name'][i] in ['angle', 'rotation']:
+                variables['value'][i]=float(variables['value'][i])*3.14/180
     ### переменные ###
     vars = {"t": lambda **kwargs: 0}
     
-    for i in range(0, len(values['name'])):
-        print(str(values['value'][i]).replace("{", "kwargs['").replace("}","']"))
-        vars[values['name'][i]]=lambda my_str = str(values['value'][i]).replace("{", "kwargs['").replace("}","']"), **kwargs: eval(my_str)
-    print(vars)
+    for i in range(0, len(variables['name'])):
+        vars[variables['name'][i]]=lambda my_str = str(variables['value'][i]).replace("{", "kwargs['").replace("}","']"), **kwargs: eval(my_str)
     var_values = {}
     
     
     
-    for name in values['name']:
-        print(name+": "+str(var_values))
+    for name in variables['name']:
         var_values[name]=vars[name](**var_values)
      
     print(var_values)
-    #print(vars["angle"](mass=1))
 
-    #print(eval(base_vector['x'][0].replace("{", "vars['").replace("}","'](mass=0)")))
     result = []
-
-    # начальное положение
-
-
-def get_coords(_data):
-    '''
-    @brief Функция для генерации точек через которые пролетает снаряд
-    @param angle - угл подьема пушки по оси z вверх 180>angle>0 -> z>0
-    '''
-    l = 12.6                                        # длинна дула
-    a = _data['angle']*pi/180                       # угол в радианах (Подьем дула)
-    b = _data['rotation']*pi/180
-
-    velocity = (float(_data['impulse'])*cos(a)*cos(b)+0.0, float(_data['impulse'])*sin(b)*cos(a)+0.0, float(_data['impulse'])*sin(a)+0.0)    # вектор движения
-    gravity=(0,0,-9.8*_data['mass'])                # вектор ускорения по гровитации
-
-    accelerations = [gravity]                       # список ускорений
-
+    ### BASE VECTOR ###
+    r_vector = []
+    for v in ['x','y','z']:
+        r_vector.append(eval(base_vector[v][0].replace("{", "var_values['").replace("}","']")))
     
-    result = [(l*cos(a)*cos(b)+0.0, l*sin(b)*cos(a)+0.0, l*sin(a)+0.0)]                      # стартовая точка
-    
+    result.append((r_vector[0],r_vector[1],r_vector[2]))
+
+
+    ### скорость ###
+    r_vector = []
+    for v in ['x','y','z']:
+        r_vector.append(eval(velocity_vector[v][0].replace("{", "var_values['").replace("}","']")))
+    velocity = (r_vector[0],r_vector[1],r_vector[2])
+    ### ускорения ###
+    accelerators = []
+    for i in range(0,len(acceleration_vectors['name'])):
+        r_vector = []
+        for v in ['x','y','z']:
+            r_vector.append(eval(str(acceleration_vectors[v][i]).replace("{", "var_values['").replace("}","']")))
+        accelerators.append((r_vector[0],r_vector[1],r_vector[2]))
+    print(accelerators)
+    ### расчет точек ###
     i = 0
     velocity_value = []
     velocity_t= []
@@ -74,7 +76,7 @@ def get_coords(_data):
     velocity_chart.clear("scatter")
     while (result[i][2]>=0):
         result.append(sum_vect(result[i],velocity))
-        for accelerator in accelerations:
+        for accelerator in accelerators:
             velocity=sum_vect(velocity,accelerator)
             velocity_t.append(i)
             velocity_value.append(sqrt(velocity[0]*velocity[0]+velocity[1]*velocity[1]+velocity[2]*velocity[2]))
