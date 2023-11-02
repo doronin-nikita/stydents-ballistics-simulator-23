@@ -1,5 +1,7 @@
-from tkinter import Tk, Frame, BOTH, Canvas, BOTTOM, LEFT, VERTICAL, RIGHT, ALL, X, Y, Label, Entry, INSERT
+from tkinter import Tk, Frame, BOTH, Canvas, BOTTOM, LEFT, VERTICAL, RIGHT, ALL, X, Y, Label, Entry, INSERT, StringVar
 from tkinter.ttk import Button, Scrollbar
+from pandas import read_csv, concat, DataFrame
+
 root = Tk()
 root.title('REDACTOR')
 root.geometry("900x400")
@@ -16,19 +18,45 @@ my_canvas.bind("<Configure>",lambda e: my_canvas.config(scrollregion= my_canvas.
 second_frame = Frame(my_canvas)
 my_canvas.create_window((0,0),window= second_frame, anchor="nw")
 
-from pandas import read_csv, concat, DataFrame
-
 ### Загрузка констант ###
-values = read_csv("values.csv") 
-base_vector = read_csv("base vector.csv")
+tables = {}
+tables['values'] = read_csv("values.csv") 
+tables['base_vector'] = read_csv("base vector.csv")
 
+def update_table(table, value, row, entry, event):
+    tables[table][value][row] = entry.get()+event.char
+
+def redraw():
+    for child in second_frame.winfo_children():
+        child.destroy()
+    current_row = 0
+    Label(text='Переменные и константы:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    Entry(second_frame,  background="#9BC2E6", width=16, textvariable=StringVar(value="name"),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
+    Entry(second_frame,  background="#9BC2E6", width=64, textvariable=StringVar(value="value"),cnf={'state':'readonly'}).grid(row=current_row,column=1, columnspan=4, in_=second_frame)
+    current_row+=1    
+    for i in range(0,len(tables['values']['name'])):
+        Button(text=tables['values']['name'][i], width=16).grid(row=current_row, column=0, in_=second_frame)
+        ent = Entry(second_frame, width=64, textvariable=StringVar(value=tables['values']['value'][i]))
+        ent.grid(row=current_row,column=1, columnspan=4, in_=second_frame)
+        ent.bind("<Key>",func=lambda ev, en=ent,tb='values', vl='value', rw=i:update_table(table=tb, value=vl, row=rw, entry=en, event=ev))
+        current_row+=1
+    
+    new_value = Entry().grid(row=current_row, column=0, in_=second_frame)
+    current_row+=1
+    Button(text='save', width=80, command=lambda tbl='values', file='values.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+redraw()
+
+root.mainloop()
+
+
+'''
 def add_value(name, value):
     global values
     values.loc[len(values.index)] =  [name, value]
     new_value_add_btn.destroy()
     entry_click()
     Redraw()
-    print(values)
 
 ActiveEntry = None
 ActiveColumn= None
@@ -73,10 +101,11 @@ def Redraw():
         btn = Button(text=values['name'][i], width=16, command=lambda text="{"+values['name'][i]+"}": insert_name(text))
         btn.grid(row=current_row, column=0, in_=second_frame)
 
+        ptr = pointer()
         text = Entry(root, width=16*4) 
         text.grid(row=current_row,column=1,columnspan=4, in_=second_frame)
-        text.insert(INSERT, values['value'][i]) 
-        text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
+        text.insert(INSERT, values['value'][i].value) 
+        #text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
     
     current_row+=1
     new_value_name = Entry(root, width=16) 
@@ -132,8 +161,4 @@ def Redraw():
         current_row+=1
         Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
 
-    
-
-Redraw()
-
-root.mainloop()
+'''
