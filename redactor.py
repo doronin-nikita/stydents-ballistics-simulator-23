@@ -4,7 +4,7 @@ from pandas import read_csv, concat, DataFrame
 
 root = Tk()
 root.title('REDACTOR')
-root.geometry("900x400")
+root.geometry("900x700")
 main_frame = Frame(root)
 main_frame.pack(fill=BOTH,expand=1)
 sec = Frame(main_frame)
@@ -22,143 +22,95 @@ my_canvas.create_window((0,0),window= second_frame, anchor="nw")
 tables = {}
 tables['values'] = read_csv("values.csv") 
 tables['base_vector'] = read_csv("base vector.csv")
+tables['velocity_vector'] = read_csv("velocity vector.csv")
+tables['acceleration_vectors'] = read_csv("acceleration vectors.csv")
 
+coord_names = ['x','y','z']
+
+active_entry = None
+
+def select_entry(entry, event):
+    global active_entry
+    active_entry = entry
 def update_table(table, value, row, entry, event):
+    select_entry(entry, event)
     tables[table][value][row] = entry.get()+event.char
 
+def add_row(table, row):
+    tables[table].loc[len(tables[table].index)] =  row
+
 def redraw():
+    global active_entry
     for child in second_frame.winfo_children():
         child.destroy()
     current_row = 0
-    Label(text='Переменные и константы:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    Label(second_frame, text='Переменные и константы:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
     current_row+=1
     Entry(second_frame,  background="#9BC2E6", width=16, textvariable=StringVar(value="name"),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
     Entry(second_frame,  background="#9BC2E6", width=64, textvariable=StringVar(value="value"),cnf={'state':'readonly'}).grid(row=current_row,column=1, columnspan=4, in_=second_frame)
     current_row+=1    
     for i in range(0,len(tables['values']['name'])):
-        Button(text=tables['values']['name'][i], width=16).grid(row=current_row, column=0, in_=second_frame)
+        Button(second_frame, text=tables['values']['name'][i], width=16, command=lambda bt_name="{"+tables['values']['name'][i]+"}": active_entry.insert(INSERT, bt_name) if (active_entry is not None) else print("select entry")).grid(row=current_row, column=0, in_=second_frame)
         ent = Entry(second_frame, width=64, textvariable=StringVar(value=tables['values']['value'][i]))
         ent.grid(row=current_row,column=1, columnspan=4, in_=second_frame)
         ent.bind("<Key>",func=lambda ev, en=ent,tb='values', vl='value', rw=i:update_table(table=tb, value=vl, row=rw, entry=en, event=ev))
+        ent.bind("<1>", func=lambda ev, en=ent: select_entry(entry=en, event=ev))
         current_row+=1
     
-    new_value = Entry().grid(row=current_row, column=0, in_=second_frame)
+    new_variable = Entry(second_frame, width=16, textvariable=StringVar(value="new"))
+    new_variable.grid(row=current_row, column=0, in_=second_frame)
+    new_variable_value = Entry(second_frame, width=64)
+    new_variable_value.grid(row=current_row, column=1,columnspan=4, in_=second_frame)
+    new_variable_value.bind("<1>", func=lambda ev, en=new_variable_value: select_entry(entry=en, event=ev))
+    Button(second_frame,text="add", command=lambda table="values", nv_name=new_variable, nv_value=new_variable_value: (add_row(table=table, row=[nv_name.get(), nv_value.get()]), redraw())).grid(row=current_row, column=5,in_=second_frame)
     current_row+=1
-    Button(text='save', width=80, command=lambda tbl='values', file='values.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    Button(second_frame, text='save', width=80, command=lambda tbl='values', file='values.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    Label(second_frame, text='Начальная точка (вершина дула):').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    for i in range(0,len(coord_names)):
+        Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=coord_names[i]),cnf={'state':'readonly'}).grid(row=current_row,column=i+1, in_=second_frame)
+        ent = Entry(second_frame, width=20, textvariable=StringVar(value=tables['base_vector'][coord_names[i]][0]))
+        ent.grid(row=current_row+1,column=i+1, in_=second_frame)
+        ent.bind("<Key>",func=lambda ev, en=ent,tb='base_vector', vl=coord_names[i], rw=0:update_table(table=tb, value=vl, row=rw, entry=en, event=ev))
+        ent.bind("<1>", func=lambda ev, en=ent: select_entry(entry=en, event=ev))
+    current_row+=1
+    Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=tables['base_vector']['name'][0]),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
+    Button(second_frame, text='save', command=lambda tbl='base_vector', file='base vector.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=5, in_=second_frame)
+    current_row+=1
+    
+    Label(second_frame, text='Вектор скорости:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    for i in range(0,len(coord_names)):
+        Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=coord_names[i]),cnf={'state':'readonly'}).grid(row=current_row,column=i+1, in_=second_frame)
+        ent = Entry(second_frame, width=20, textvariable=StringVar(value=tables['velocity_vector'][coord_names[i]][0]))
+        ent.grid(row=current_row+1,column=i+1, in_=second_frame)
+        ent.bind("<Key>",func=lambda ev, en=ent,tb='velocity_vector', vl=coord_names[i], rw=0:update_table(table=tb, value=vl, row=rw, entry=en, event=ev))
+        ent.bind("<1>", func=lambda ev, en=ent: select_entry(entry=en, event=ev))
+    current_row+=1
+    Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=tables['velocity_vector']['name'][0]),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
+    Button(second_frame, text='save', command=lambda tbl='velocity_vector', file='velocity vector.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=5, in_=second_frame)
+    current_row+=1
+    
+    Label(second_frame, text='Вектора ускорений:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    for i in range(0,len(coord_names)):
+        Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=coord_names[i]),cnf={'state':'readonly'}).grid(row=current_row,column=i+1, in_=second_frame)
+        for k in range(0,len(tables['acceleration_vectors']['name'])):
+            ent = Entry(second_frame, width=20, textvariable=StringVar(value=tables['acceleration_vectors'][coord_names[i]][k]))
+            ent.grid(row=current_row+1+k,column=i+1, in_=second_frame)
+            ent.bind("<Key>",func=lambda ev, en=ent,tb='acceleration_vectors', vl=coord_names[i], rw=k:update_table(table=tb, value=vl, row=rw, entry=en, event=ev))
+            ent.bind("<1>", func=lambda ev, en=ent: select_entry(entry=en, event=ev))
+    current_row+=1
+    for k in range(0,len(tables['acceleration_vectors']['name'])):
+        Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value=tables['acceleration_vectors']['name'][k]),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
+        current_row+=1
+    Button(second_frame, text='save', width=30, command=lambda tbl='acceleration_vectors', file='acceleration vectors.csv': tables[tbl].to_csv(file, index=False)).grid(row=current_row, column=3, columnspan=3, in_=second_frame)
+    new_variable = Entry(second_frame, width=20, textvariable=StringVar(value="new"))
+    new_variable.grid(row=current_row, column=0, in_=second_frame)
+    Button(second_frame,text="add", width=20, command=lambda table='acceleration_vectors', nv_name=new_variable, nv_value=None: (add_row(table=table, row=[nv_name.get(), 0,0,0]), redraw())).grid(row=current_row, column=1,in_=second_frame)
+   
+
 redraw()
 
 root.mainloop()
-
-
-'''
-def add_value(name, value):
-    global values
-    values.loc[len(values.index)] =  [name, value]
-    new_value_add_btn.destroy()
-    entry_click()
-    Redraw()
-
-ActiveEntry = None
-ActiveColumn= None
-
-def entry_click(col_index=None, clickedEntry=None, event=None):
-    global ActiveEntry
-    global ActiveColumn
-    if (ActiveColumn is not None):
-        values['value'][ActiveColumn]=ActiveEntry.get()
-    
-    ActiveColumn = col_index
-    if (clickedEntry is not None):
-        ActiveEntry = clickedEntry
-
-def insert_name(text):
-    global ActiveEntry
-    ActiveEntry.insert(INSERT, text) 
-
-def save_values():
-    values.to_csv('values.csv', index=False)
-
-def Redraw():
-    global ActiveEntry
-    for child in second_frame.winfo_children():
-        child.destroy()
-    current_row=0
-    Label(text='Переменные и константы:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-    current_row=+1
-    
-    text = Entry(root, width=16, bg = "#9BC2E6") 
-    text.grid(row=current_row,column=0, in_=second_frame) #columnspan=j* 
-    text.insert(INSERT, 'name') 
-    text.config(state='readonly')
-
-    text = Entry(root, width=16*4, bg = "#9BC2E6") 
-    text.grid(row=current_row,column=1, columnspan=4, in_=second_frame) #columnspan=j* 
-    text.insert(INSERT, 'value') 
-    text.config(state='readonly')
-
-    for i in range(0,len(values['name'])):
-        current_row+=1
-        btn = Button(text=values['name'][i], width=16, command=lambda text="{"+values['name'][i]+"}": insert_name(text))
-        btn.grid(row=current_row, column=0, in_=second_frame)
-
-        ptr = pointer()
-        text = Entry(root, width=16*4) 
-        text.grid(row=current_row,column=1,columnspan=4, in_=second_frame)
-        text.insert(INSERT, values['value'][i].value) 
-        #text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
-    
-    current_row+=1
-    new_value_name = Entry(root, width=16) 
-    new_value_name.grid(row=current_row,column=0, in_=second_frame) 
-    new_value_name.insert(INSERT, 'new') 
-    new_value_value = Entry(root, width=16*4) 
-    new_value_value.grid(row=current_row,column=1, columnspan=4, in_=second_frame) 
-    new_value_value.insert(INSERT, '') 
-    new_value_value.bind("<1>", lambda e, text= new_value_value: entry_click(None, text, e))
-    global new_value_add_btn
-    new_value_add_btn= Button(text='add', width=15, command=lambda: add_value(name=new_value_name.get(), value=new_value_value.get()))
-    new_value_add_btn.grid(row=current_row, column=5, in_=second_frame)
-    
-    current_row+=1
-    Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-    
-    current_row+=1
-    Label(text='-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-').grid(row=current_row, column=0, columnspan=6, in_=second_frame)
-    
-    current_row+=1
-    Label(text='начальная точка {x0, y0, z0}').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-    current_row+=1
-
-    current_column = 1
-    for v in {'x', 'y', 'z'}:
-        text = Entry(root, width=20, bg = "#9BC2E6")
-        text.grid(row=current_row,column=current_column, in_=second_frame) #columnspan=j*
-        text.insert(INSERT, v)
-        text.config(state='readonly')
-        current_column+=1
-
-    for i in range(0,len(base_vector['name'])):
-        current_row+=1
-        btn = Button(text=base_vector['name'][i], width=16, command=lambda text="{"+base_vector['name'][i]+"}": insert_name(text))
-        btn.grid(row=current_row, column=0, in_=second_frame)
-
-        current_column=1
-        for v in {'x', 'y', 'z'}:
-            text = Entry(root, width=20) 
-            text.grid(row=current_row,column=current_column, in_=second_frame)
-            text.insert(INSERT, base_vector[v][i]) 
-            text.bind("<1>", lambda e, col_index=i,  text=text: entry_click(col_index, text, e))
-            current_column+=1
-    current_row+=1
-    Button(text='save',  width=15*5, command=lambda table=base_vector, file="base vector.csv":table.to_csv(file, index=False)).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-
-    current_row+=1
-    Label(text='вектора скорости').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-
-    current_row+=1
-    Label(text='вектора ускорений').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-    for i in range(0,100):
-        current_row+=1
-        Button(text='save',  width=15*5, command=save_values).grid(row=current_row, column=0, columnspan=5, in_=second_frame)
-
-'''
