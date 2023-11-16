@@ -49,6 +49,9 @@ def redraw():
     Entry(second_frame,  background="#9BC2E6", width=16, textvariable=StringVar(value="name"),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
     Entry(second_frame,  background="#9BC2E6", width=64, textvariable=StringVar(value="value"),cnf={'state':'readonly'}).grid(row=current_row,column=1, columnspan=4, in_=second_frame)
     current_row+=1    
+    Button(second_frame, text="t", width=16, command=lambda bt_name="{""t""}": active_entry.insert(INSERT, bt_name) if (active_entry is not None) else print("select entry")).grid(row=current_row, column=0, in_=second_frame)
+    Entry(second_frame, width=64, textvariable=StringVar(value="t+1"),cnf={'state':'readonly'}).grid(row=current_row,column=1, columnspan=4, in_=second_frame)
+    current_row+=1    
     for i in range(0,len(tables['values']['name'])):
         Button(second_frame, text=tables['values']['name'][i], width=16, command=lambda bt_name="{"+tables['values']['name'][i]+"}": active_entry.insert(INSERT, bt_name) if (active_entry is not None) else print("select entry")).grid(row=current_row, column=0, in_=second_frame)
         ent = Entry(second_frame, width=64, textvariable=StringVar(value=tables['values']['value'][i]))

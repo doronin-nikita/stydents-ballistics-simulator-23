@@ -3,17 +3,17 @@
 '''
 
 import pyvista as pv
-from physic import get_coords_new as get_coords, data, velocity_chart
+from physic import get_coords, velocity_chart
 from modeles import *
 
 plotter = pv.Plotter()
 
 class myScene:
-    '''
+    '''!
     @brief Класс отвечающий за создание интерактивной сцены пущечного выстрела
     '''
     def __init__(self, _cannon, _cannon_platform, _data):
-        '''
+        '''!
         @brief инициализация обьекта сцены пушечного выстрела
         @param _cannon, указывает на модель дула пушки
         @param __cannon_platform, указывает на модель основания пушки
