@@ -24,6 +24,7 @@ tables['values'] = read_csv("values.csv")
 tables['base_vector'] = read_csv("base vector.csv")
 tables['velocity_vector'] = read_csv("velocity vector.csv")
 tables['acceleration_vectors'] = read_csv("acceleration vectors.csv")
+tables['graphics'] = read_csv("graphics.csv")
 
 coord_names = ['x','y','z']
 
@@ -112,7 +113,14 @@ def redraw():
     new_variable = Entry(second_frame, width=20, textvariable=StringVar(value="new"))
     new_variable.grid(row=current_row, column=0, in_=second_frame)
     Button(second_frame,text="add", width=20, command=lambda table='acceleration_vectors', nv_name=new_variable, nv_value=None: (add_row(table=table, row=[nv_name.get(), 0,0,0]), redraw())).grid(row=current_row, column=1,in_=second_frame)
-   
+    current_row+=1
+    
+    Label(second_frame, text='Вывод графиков:').grid(row=current_row, column=0, columnspan=5, in_=second_frame)
+    current_row+=1
+    Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value="name"),cnf={'state':'readonly'}).grid(row=current_row,column=0, in_=second_frame)
+    Entry(second_frame,  background="#9BC2E6", width=20, textvariable=StringVar(value="visible"),cnf={'state':'readonly'}).grid(row=current_row,column=1, in_=second_frame)
+    Entry(second_frame,  background="#9BC2E6", width=40, textvariable=StringVar(value="values x:y"),cnf={'state':'readonly'}).grid(row=current_row,column=2, columnspan=2, in_=second_frame)
+    current_row+=1    
 
 redraw()
 
