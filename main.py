@@ -3,7 +3,7 @@
 '''
 
 import pyvista as pv
-from physic import get_coords, velocity_chart
+from physic_2 import get_coords, graphics
 from modeles import *
 
 plotter = pv.Plotter()
@@ -21,7 +21,7 @@ class myScene:
         @param _data, копирует таблицу числовых параметров физических показателей обьектов сцены
         '''
         self.data = _data
-        self.plot = pv.Plotter(shape="1|1")
+        self.plot = pv.Plotter(shape=f"1|{len(graphics)}")
 
         self.plot.title = 'cannon simulator'
         self.original_cannon=_cannon                                # изначальные модели дула и платформы
@@ -30,10 +30,12 @@ class myScene:
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform)
 
         self.bullets = []
-
-        self.plot.subplot(1)
-        self.plot.set_background('gray', all_renderers=False)
-        self.plot.label="Velocity"
+        i = 1
+        for graphic in graphics:
+            self.plot.subplot(i)
+            self.plot.set_background('gray', all_renderers=False)
+            self.plot.label=graphic
+            i+=1
         self.plot.subplot(0)
 
         self.plot.show_grid()
@@ -64,8 +66,11 @@ class myScene:
         self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
 
-        self.plot.subplot(1) 
-        self.plot.add_chart(velocity_chart)  
+        i = 0
+        for graphic in graphics:
+            i+=1
+            self.plot.subplot(i) 
+            self.plot.add_chart(graphics[graphic])
 
         self.plot.subplot(0)
         self.plot.render()

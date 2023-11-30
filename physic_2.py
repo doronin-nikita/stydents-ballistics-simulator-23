@@ -11,12 +11,26 @@ def sum_vect(v1,v2):
     return tuple(i+j for i,j in zip(v1,v2))
 
 
-### График скорости ####
-from pyvista import Chart2D
-velocity_chart = Chart2D()
-velocity_t = []
-velocity_value = []
+### Графики скорости ####
 
+from pyvista import Chart2D
+graphics = {}
+parametres = {}
+
+graphics_table = read_csv("graphics.csv") 
+for i in graphics_table.index:
+    if graphics_table['show'][i]==0:
+        graphics_table=graphics_table.drop(index=i)
+for i in graphics_table.index:
+   graphics[graphics_table['name'][i]]=Chart2D()
+   parametres[graphics_table['name'][i]]={'x':[], 'y':[]}
+   zamena = { '{''t''}':'t', '{''x''}':'x', '{''y''}':'y', '{''z''}':'z', '{''velocity''}':'sqrt(velocity[0]*velocity[0]+velocity[1]*velocity[1]+velocity[2]*velocity[2])'}
+   for vl in zamena:
+       if graphics_table['x'][i]==vl:
+            parametres[graphics_table['name'][i]]['x_param']=zamena[vl]   
+       if graphics_table['y'][i]==vl:
+            parametres[graphics_table['name'][i]]['y_param']=zamena[vl]   
+  
 def get_coords(_data):
     variables = read_csv("values.csv") 
     base_vector = read_csv("base vector.csv")
@@ -66,18 +80,28 @@ def get_coords(_data):
         accelerators.append((r_vector[0],r_vector[1],r_vector[2]))
     print(accelerators)
     ### расчет точек ###
-    i = 0
-    velocity_value = []
-    velocity_t= []
-    velocity_chart.clear("line")
-    velocity_chart.clear("scatter")
-    while (result[i][2]>=0):
-        result.append(sum_vect(result[i],velocity))
+    t = 0
+    for graphic in graphics:
+        parametres[graphic]['x']=[]
+        parametres[graphic]['y']=[]
+        graphics[graphic].clear("line")
+        graphics[graphic].clear("scatter")
+    while (result[t][2]>=0):
+        x = result[t][0]
+        y = result[t][1]
+        z = result[t][2]        
+        result.append(sum_vect(result[t],velocity))
         for accelerator in accelerators:
             velocity=sum_vect(velocity,accelerator)
-            velocity_t.append(i)
-            velocity_value.append(sqrt(velocity[0]*velocity[0]+velocity[1]*velocity[1]+velocity[2]*velocity[2]))
-        i=i+1
-        _ = velocity_chart.scatter(velocity_t,velocity_value)
-        _ = velocity_chart.line(velocity_t,velocity_value,'r')
+            for graphic in graphics:
+                parametres[graphic]['x'].append(eval(parametres[graphic]['x_param']))
+                parametres[graphic]['y'].append(eval(parametres[graphic]['y_param']))
+            #velocity_t.append(t)
+            #velocity_value.append(sqrt(velocity[0]*velocity[0]+velocity[1]*velocity[1]+velocity[2]*velocity[2]))
+        t=t+1
+        for graphic in graphics:
+            _ = graphics[graphic].scatter(parametres[graphic]['x'], parametres[graphic]['y'])
+            _ = graphics[graphic].line(parametres[graphic]['x'], parametres[graphic]['y'], 'r')
+        #_ = velocity_chart.scatter(velocity_t,velocity_value)
+        #_ = velocity_chart.line(velocity_t,velocity_value,'r')
     return result
