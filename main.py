@@ -5,6 +5,9 @@
 import pyvista as pv
 from physic_2 import get_coords, graphics
 from modeles import *
+import platform
+
+rendering = platform.system()=="Linux"
 
 plotter = pv.Plotter()
 
@@ -40,8 +43,8 @@ class myScene:
 
         self.plot.show_grid()
         self.plot.add_camera_orientation_widget()
-
-        self.plot.suppress_rendering = True
+        if rendering:
+            self.plot.suppress_rendering = True
     
     def redraw(self, _data=None):
         '''
@@ -61,7 +64,8 @@ class myScene:
         self.bullets = []
 
         for coords in get_coords(self.data):
-            self.bullets.append(self.plot.add_mesh(pv.Sphere(center=coords, radius=0.3), color="red"))
+
+            self.bullets.append(self.plot.add_mesh(pv.Sphere(center=(coords[0], coords[1], coords[2]+1.5), radius=0.3), color="red"))
 
         self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
@@ -73,7 +77,8 @@ class myScene:
             self.plot.add_chart(graphics[graphic])
 
         self.plot.subplot(0)
-        self.plot.render()
+        if rendering:
+            self.plot.render()
         
     def show(self):
         '''
