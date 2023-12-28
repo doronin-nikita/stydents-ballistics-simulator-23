@@ -8,6 +8,7 @@ from modeles import *
 import platform
  
 map_img =  pv.examples.download_crater_topo()
+mp2 = pv.examples.load_random_hills()
 show_map = False
 def toggle_map_view():
     global show_map
@@ -39,7 +40,7 @@ class myScene:
         self.actor_cannon = self.plot.add_mesh(self.original_cannon)
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform)
         if show_map:
-            n_mp = map_img.extract_subset((40,90,40,90,0,0), (1,1,1))
+            n_mp = map_img.extract_subset((40,50,40,50,0,0), (1,1,1))
             terrain = n_mp.warp_by_scalar()
             self.terrain = self.plot.add_mesh(mesh=terrain)
         else:
@@ -76,11 +77,8 @@ class myScene:
 
         if show_map:
             self.plot.remove_actor(self.terrain)
-            n_mp = map_img.extract_subset((40,90,40,90,0,0), (1,1,1))
-            terrain = n_mp.warp_by_scalar()
-            self.terrain = self.plot.add_mesh(mesh=terrain)
-            print(terrain)
-
+            self.terrain = self.plot.add_mesh(mp2)
+            print(mp2)
         self.bullets = []
 
         for coords in get_coords(self.data):
@@ -131,7 +129,7 @@ scene.plot.add_slider_widget(
 )
 
 scene.plot.add_checkbox_button_widget(lambda v: (toggle_map_view(), scene.redraw()), value=False)
-
+#scene.plot.add_floor()
 
 
 scene.show()
