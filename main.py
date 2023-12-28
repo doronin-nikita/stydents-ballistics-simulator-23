@@ -45,7 +45,8 @@ class myScene:
             self.terrain = self.plot.add_mesh(mesh=terrain)
         else:
             self.terrain = None
-        
+        self.floor = self.plot.add_floor()
+
         self.bullets = []
         i = 1
         for graphic in graphics:
@@ -75,10 +76,8 @@ class myScene:
         for bullet in self.bullets:
             self.plot.remove_actor(bullet)
 
-        self.plot.remove_actor(self.terrain)
-        if show_map:
-            self.terrain = self.plot.add_mesh(mp2)
-            print(mp2)
+        
+
             
         self.bullets = []
 
@@ -89,7 +88,11 @@ class myScene:
         self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
 
-        
+        self.plot.remove_actor(self.terrain)
+        self.plot.remove_actor(self.floor)
+        if show_map:
+            self.terrain = self.plot.add_mesh(mp2)
+            self.floor = self.plot.add_floor()
 
         i = 0
         for graphic in graphics:
