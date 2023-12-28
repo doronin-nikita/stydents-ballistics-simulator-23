@@ -130,7 +130,7 @@ scene.plot.add_slider_widget(
         style="modern",
 )
 
-scene.plot.add_checkbox_button_widget(lambda v: (toggle_map_view(), scene.redraw()))
+scene.plot.add_checkbox_button_widget(lambda v: (toggle_map_view(), scene.redraw()), value=False)
 
 
 
