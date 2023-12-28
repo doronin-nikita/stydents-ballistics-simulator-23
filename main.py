@@ -6,6 +6,12 @@ import pyvista as pv
 from physic_2 import get_coords, graphics
 from modeles import *
 import platform
+ 
+map_img =  pv.examples.download_crater_topo()
+show_map = False
+def toggle_map_view():
+    global show_map
+    show_map=not(show_map)
 
 rendering = platform.system()=="Linux"
 
@@ -27,17 +33,24 @@ class myScene:
         self.plot = pv.Plotter(shape=f"1|{len(graphics)}")
 
         self.plot.title = 'cannon simulator'
+        self.plot.add_text('balistic simulator')
         self.original_cannon=_cannon                                # изначальные модели дула и платформы
         self.original_cannon_platform=_cannon_platform
         self.actor_cannon = self.plot.add_mesh(self.original_cannon)
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform)
-
+        if show_map:
+            n_mp = map_img.extract_subset((40,90,40,90,0,0), (1,1,1))
+            terrain = n_mp.warp_by_scalar()
+            self.terrain = self.plot.add_mesh(mesh=terrain)
+        else:
+            self.terrain = None
+        
         self.bullets = []
         i = 1
         for graphic in graphics:
             self.plot.subplot(i)
             self.plot.set_background('gray', all_renderers=False)
-            self.plot.label=graphic
+            self.plot.add_text(graphic)
             i+=1
         self.plot.subplot(0)
 
@@ -61,6 +74,13 @@ class myScene:
         for bullet in self.bullets:
             self.plot.remove_actor(bullet)
 
+        if show_map:
+            self.plot.remove_actor(self.terrain)
+            n_mp = map_img.extract_subset((40,90,40,90,0,0), (1,1,1))
+            terrain = n_mp.warp_by_scalar()
+            self.terrain = self.plot.add_mesh(mesh=terrain)
+            print(terrain)
+
         self.bullets = []
 
         for coords in get_coords(self.data):
@@ -69,6 +89,8 @@ class myScene:
 
         self.actor_cannon = self.plot.add_mesh(self.original_cannon.rotate_y(360-self.data['angle']).rotate_z(self.data['rotation']), color="g")
         self.actor_cannon_platform = self.plot.add_mesh(self.original_cannon_platform.rotate_z(self.data['rotation']), color="g")
+
+        
 
         i = 0
         for graphic in graphics:
@@ -107,6 +129,8 @@ scene.plot.add_slider_widget(
         pointb=(0.9,0.1),
         style="modern",
 )
+
+scene.plot.add_checkbox_button_widget(lambda v: (toggle_map_view(), scene.redraw()))
 
 
 
