@@ -75,10 +75,11 @@ class myScene:
         for bullet in self.bullets:
             self.plot.remove_actor(bullet)
 
+        self.plot.remove_actor(self.terrain)
         if show_map:
-            self.plot.remove_actor(self.terrain)
             self.terrain = self.plot.add_mesh(mp2)
             print(mp2)
+            
         self.bullets = []
 
         for coords in get_coords(self.data):
